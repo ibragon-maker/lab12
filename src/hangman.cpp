@@ -2,6 +2,8 @@
 
 #include <iomanip>
 #include <iostream>
+#include <random>
+#include <string>
 
 #include "input.h"
 #include "words.h"
@@ -87,6 +89,8 @@ Hangman::Hangman()
 int Hangman::times_played() const {
     return m_times_played;
 }
+
+constexpr int max_misses = 6;
 
 void Hangman::play() {
     ++m_times_played;

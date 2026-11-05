@@ -4,6 +4,8 @@
 #include "game.h"
 #include <string>
 
+int hangman_score(int misses_left, int word_length);
+
 class Hangman : public Game {
 public:
     Hangman();
