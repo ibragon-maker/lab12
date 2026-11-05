@@ -46,36 +46,39 @@ Choice parse_choice(const std::string &text) {
 } // namespace
 
 int main() {
-  std::string line;
-  while (true) {
-    print_menu();
-    if (!prompt_line("Choose: ", line)) {
-      break; // input ended
+    Hangman hangman;
+    Minesweeper minesweeper;
+    
+    std::string line;
+    while (true) {
+        print_menu();
+        if (!prompt_line("Choose: ", line)) {
+            break;
+        }
+        const Choice choice(parse_choice(line));
+        if (choice == Choice::quit) {
+            break;
+        }
+        switch (choice) {
+        case Choice::hangman:
+            hangman.play();
+            report_score(hangman.last_score());
+            break;
+        case Choice::dungeon:
+            break;
+        case Choice::blackjack:
+            break;
+        case Choice::minesweeper:
+            minesweeper.play();
+            report_score(minesweeper.last_score());
+            break;
+        case Choice::quit:
+            break;
+        case Choice::invalid:
+            std::cout << "Please enter 1-4, or 0 to quit.\n";
+            break;
+        }
     }
-    const Choice choice{parse_choice(line)};
-    if (choice == Choice::quit) {
-      break;
-    }
-    switch (choice) {
-    case Choice::hangman:
-      report_score(play_hangman());
-      break;
-    case Choice::dungeon:
-      report_score(play_dungeon());
-      break;
-    case Choice::blackjack:
-      report_score(play_blackjack());
-      break;
-    case Choice::minesweeper:
-      report_score(play_minesweeper());
-      break;
-    case Choice::quit:
-      break;
-    case Choice::invalid:
-      std::cout << "Please enter 1-4, or 0 to quit.\n";
-      break;
-    }
-  }
-  std::cout << "Goodbye.\n";
-  return 0;
+    std::cout << "Goodbye.\n";
+    return 0;
 }
