@@ -81,46 +81,58 @@ int hangman_score(int misses_left, int word_length) {
   return misses_left * 10 + word_length * 5;
 }
 
-int play_hangman() {
-  std::random_device device;
-  std::mt19937 gen{device()};
+Hangman::Hangman() 
+    : Game("Hangman"), m_times_played(0) {}
 
-  const std::string word = pick_word(word_list, word_count, gen);
-  std::string masked(word.size(), '_');
-  std::string guessed;
-  int misses = 0;
+int Hangman::times_played() const {
+    return m_times_played;
+}
 
-  std::cout << "\n--- Hangman ---\n";
-  while (misses < max_misses && masked != word) {
+void Hangman::play() {
+    ++m_times_played;
+
+    std::random_device device;
+    std::mt19937 gen(device());
+
+    const std::string word = pick_word(word_list, word_count, gen);
+    std::string masked(word.size(), '_');
+    std::string guessed;
+    int misses = 0;
+
+    std::cout << "\n--- Hangman ---\n";
+    while (misses < max_misses && masked != word) {
+        draw_gallows(misses);
+        print_status(masked, guessed, max_misses - misses);
+
+        std::string line;
+        if (!prompt_line("Guess a letter: ", line)) {
+            set_score(0);
+            return;
+        }
+        if (line.size() != 1 || !is_letter(line[0])) {
+            std::cout << "Please enter a single letter.\n";
+            continue;
+        }
+
+        const char guess = to_lower(line[0]);
+        if (already_guessed(guessed, guess)) {
+            std::cout << "You already guessed '" << guess << "'.\n";
+            continue;
+        }
+
+        guessed += guess;
+        if (!reveal_letter(word, masked, guess)) {
+            ++misses;
+            std::cout << "No '" << guess << "' in the word.\n";
+        }
+    }
+
     draw_gallows(misses);
-    print_status(masked, guessed, max_misses - misses);
-
-    std::string line;
-    if (!prompt_line("Guess a letter: ", line)) {
-      return 0;
+    if (masked == word) {
+        std::cout << "You win! The word was " << word << ".\n";
+        set_score(hangman_score(max_misses - misses, static_cast<int>(word.size())));
+    } else {
+        std::cout << "You lose. The word was " << word << ".\n";
+        set_score(0);
     }
-    if (line.size() != 1 || !is_letter(line[0])) {
-      std::cout << "Please enter a single letter.\n";
-      continue;
-    }
-    const char guess = to_lower(line[0]);
-    if (already_guessed(guessed, guess)) {
-      std::cout << "You already guessed '" << guess << "'.\n";
-      continue;
-    }
-    guessed += guess;
-    if (!reveal_letter(word, masked, guess)) {
-      ++misses;
-      std::cout << "No '" << guess << "' in the word.\n";
-    }
-  }
-
-  draw_gallows(misses);
-  if (masked == word) {
-    std::cout << "You win! The word was " << word << ".\n";
-    return hangman_score(max_misses - misses, static_cast<int>(word.size()));
-  } else {
-    std::cout << "You lose. The word was " << word << ".\n";
-    return 0;
-  }
 }
